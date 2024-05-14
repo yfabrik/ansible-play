@@ -1,0 +1,7 @@
+- name: Gather facts from Windows hosts
+  hosts: charles
+  gather_facts: yes
+  tasks:
+    - name: Print gathered facts
+      debug:
+        var: ansible_facts['interfaces']

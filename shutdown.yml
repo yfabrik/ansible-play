@@ -1,0 +1,9 @@
+- hosts: charles
+  tasks:
+
+    - name: Pause for 15s
+      pause:
+        seconds: 15
+
+    - name: shutdown PC
+      win_shell: shutdown /s /t 10

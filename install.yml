@@ -1,0 +1,90 @@
+---
+- hosts: charles
+  tasks:
+    - name: install terminal
+      win_chocolatey:
+        name: microsoft-windows-terminal
+        state: present
+
+    - name: install vcvrack
+      win_chocolatey:
+        name: vcvrack
+        state: present
+
+    - name: install powertoys
+      win_chocolatey:
+        name: powertoys
+        state: present
+
+    - name: install 7zip
+      win_chocolatey:
+        name: 7zip
+        state: present
+
+
+## TODO c'est moche le openarene/openarena-0.8.8 ?
+    - name: "install retrogame : open arena"
+      win_unzip: 
+        src: '\\serveur\partage\retrogame\openarena-0.8.8.zip'
+        dest: '%programfiles%\openarena'
+      tags:
+      - retro
+      - arena
+    
+    - name: "create shortcut: arena"
+      win_shortcut: 
+        src: '%programfiles%\openarena\openarena-0.8.8\openarena.exe'
+        dest: '%public%\desktop\arena.lnk'
+        icon: '%programfiles%\openarena\openarena-0.8.8\openarena.exe,0'
+      tags:
+      - retro
+      - arena
+
+    - name: "install retrogame : war3"
+      win_copy: 
+        src: '\\serveur\partage\retrogame\warcraft3'
+        dest: '%programfiles%'
+      tags:
+      - retro
+      - war3 
+
+    - name : "create shortcut: war3"
+      win_shortcut: 
+        src: '%programfiles%\Warcraft III\warcraft3.exe'
+        dest: '%public%\desktop\war3.lnk'
+        icon: '%programfiles%\Warcraft III\warcraft3.exe,0'
+      tags:
+      - retro
+      - war3
+
+    - name: copy map war3
+      win_copy:
+        src: '\\serveur\partage\retrogame\map_war3'
+        dest: '%programfiles%\Warcraft III\maps\dl'
+      tags:
+      - retro
+      - war3
+    ## copy files
+    ##copy war3 dans c:/programfiles/war3 ?
+    ##copy les map dl dans war3
+
+    ## trackmania ?
+    ## copy track ?
+
+    ##copy openarena
+    ##copy revolt
+##make shortcut
+
+
+## zeus/caesar
+
+    - name: add partage drive 
+      win_mapped_drive: 
+        letter: S
+        path: \\192.168.1.3\partage
+        state: present
+      become_method: runas
+      # become: yes
+      become_user: "salle informatique"
+      tags:
+      - drive
