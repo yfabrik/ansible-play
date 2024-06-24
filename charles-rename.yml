@@ -1,0 +1,23 @@
+- name: rename charles
+  hosts: 
+   charles_not_find
+
+  tasks:
+    - name: rename charles PC
+      win_hostname:
+        name: "{{ item.name }}"
+      when:
+        - ansible_facts['interfaces'][0]['macaddress'] == "{{ item.mac }}"
+      loop:
+        - { name: "Charles-01", mac: "0A:00:27:00:00:0B" }
+        - { name: "Charles-02", mac: "00:23:24:B2:C5:79" }
+        - { name: "Charles-03", mac: "D8:CB:8A:21:ED:E1" }
+        - { name: "Charles-04", mac: "00:23:24:A8:FC:35" }
+        - { name: "Charles-05", mac: "D8:CB:8A:B6:25:C9" }
+        - { name: "Charles-06", mac: "44:8A:5B:DD:5E:79" }
+
+      register: res
+
+    - name: Reboot
+      ansible.windows.win_reboot:
+      when: res.reboot_required
