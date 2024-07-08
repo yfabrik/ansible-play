@@ -1,4 +1,79 @@
 ##check user ?
 ## setup wallpaper
+- name: custom wallpepr
+  hosts: charles
+  vars:
+    wallpapers:
+      - nahida.jpg
+      - yae.jpg
+      - zhongli.jpg
+  tasks:
+  - name: Assign wallpaper to each host
+    set_fact:
+      assigned_wallpaper: "{{ wallpapers[ansible_play_hosts_all.index(inventory_hostname) % wallpapers | length] }}"
+    tags: 
+    - wallpaper
+  - name: wallpaper
+    debug:
+        msg: "Host {{ inventory_hostname }} is assigned file {{ assigned_wallpaper }}"
+    tags:
+    - wallpaper
+
+  - name: set wallpaper
+    ansible.windows.win_command: powershell.exe
+    args:
+      stdin: |
+        $userid = ( Get-LocalUser admin ).SID.Value
+        new-Psdrive -name HKU -PSProvider Registry -root HKEY_USERS
+        Copy-item -Path \\serveur\partage\wallpaper\{{ assigned_wallpaper }} -Destination c:\users\admin\wallpaper.jpg
+
+        Set-ItemProperty "HKU:\$userid\Control Panel\Desktop" -Name "Wallpaper" -Value c:\users\admin\wallpaper.jpg
+
+    tags:
+    - wallpaper
+
+  # - name: Print gathered SID
+  #   debug:
+  #     msg: "SID of 'admin': {{ admin_sid.stdout }}"
+
+  # - name: regedit
+  #   win_regedit:
+     
+  #     path: hku:\{{ admin_sid.stdout_lines[0] }}\control panel\desktop
+  #     name: wallpaper
+  #     data: c:\users\admin\desktop\nahida.jpg
 
 
+  # - name: drive
+  #   win_mapped_drive:
+  #     letter: U
+  #     path: \\192.168.1.3\partage\wallpaper
+  #     state: present
+  #     username: admin
+  #   tags:
+  #     - drive
+
+  - name: schtask drive
+    win_scheduled_task:
+      name: monter
+      description: monte le partage au login
+      actions:
+      - path: cmd.exe
+        arguments: '/c net use P: \\serveur\partage /persistent:no'
+      # - path: cmd.exe
+      #   arguments: '/c schtasks /delete /tn monter /f'
+      triggers:
+        - type: logon
+      group: administrateurs
+      state: present
+      enabled: yes
+
+    tags:
+    - sch
+    - drive
+
+
+  - name: Reboot the machine with all defaults
+    ansible.windows.win_reboot:
+    tags: 
+      reboot
