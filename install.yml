@@ -1,11 +1,20 @@
 ---
-- hosts: charles
+- name: install charles
+  hosts: charles
+  gather_facts: false
+  serial: 1
+
   tasks:
     - name: install terminal
       win_chocolatey:
         name: microsoft-windows-terminal
         state: present
 
+    - name: install libre office
+      win_chocolatey:
+        name: libreoffice-fresh
+        state: present
+        
     - name: install vcvrack
       win_chocolatey:
         name: vcvrack
@@ -36,7 +45,19 @@
         name: vlc
         state: present
 
-    ## TODO c'est moche le openarene/openarena-0.8.8 ?
+
+    - name: Create directory retrogame
+      ansible.windows.win_file:
+        path: '%public%\desktop\retro'
+        state: directory
+      tags:
+        - retro
+        - arena
+        - war3
+        - tmnf
+        - revolt
+
+    # TODO c'est moche le openarene/openarena-0.8.8 ?
     - name: "install retrogame : open arena"
       win_unzip:
         src: '\\serveur\partage\retrogame\openarena-0.8.8.zip'
@@ -46,17 +67,19 @@
         - arena
 
     - name: "create shortcut: arena"
-      win_shortcut:
+      win_shortcut:  
         src: '%programfiles%\openarena\openarena-0.8.8\openarena.exe'
-        dest: '%public%\desktop\arena.lnk'
+        dest: '%public%\desktop\retro\arena.lnk'
         icon: '%programfiles%\openarena\openarena-0.8.8\openarena.exe,0'
+        state: absent
       tags:
         - retro
         - arena
+        - shortcut
 
     - name: "install retrogame : war3"
       win_unzip:
-        src: '\\serveur\partage\retrogame\w3\Warcraft III-forzenthrone.zip'
+        src: '\\serveur\partage\retrogame\w3\Warcraft III.zip'
         dest: '%programfiles%\'
       tags:
         - retro
@@ -71,12 +94,25 @@
 
     - name: "create shortcut: war3"
       win_shortcut:
-        src: '%programfiles%\Warcraft III\warcraft3.exe'
-        dest: '%public%\desktop\war3.lnk'
-        icon: '%programfiles%\Warcraft III\warcraft3.exe,0'
+        src: '%programfiles%\Warcraft III\warcraft III.exe'
+        dest: '%public%\desktop\retro\war3.lnk'
+        icon: '%programfiles%\Warcraft III\warcraft III.exe,0'
+        state: absent
       tags:
         - retro
         - war3
+        - shortcut
+
+    - name: "create shortcut: war3 frozen throne"
+      win_shortcut:
+        src: '%programfiles%\Warcraft III\frozen throne.exe'
+        dest: '%public%\desktop\retro\frozen throne.lnk'
+        icon: '%programfiles%\Warcraft III\frozen throne.exe,0'
+        state: absent
+      tags:
+        - retro
+        - war3        
+        - shortcut
 
     - name: copy map war3
       win_copy:
@@ -91,23 +127,79 @@
     ##copy les map dl dans war3
 
     ## trackmania ?
-    ## copy track ?
+    # - name: Install .Net 3.5 et directplay pour tmnf
+    #   ansible.windows.win_optional_feature:
+    #     name: 
+    #       - NetFx3
+    #       - DirectPlay
+    #     state: present
+    #   tags:
+    #     - tmnf
+    #     - feature
 
     - name: copy trackmania exec
       win_copy:
         src: '\\192.168.1.3\partage\retrogame\tmnationsforever_setup.exe'
-        dest: 'c:\users\admin\desktop'
+        dest: '%public%\desktop\retro\'
         remote_src: true
       tags:
         - tmnf
 
+    - name: copy map tmnf
+      win_copy:
+        src: '\\serveur\partage\retrogame\map tmnf\'
+        dest: 'C:\Users\Admin\Documents\TmForever\Tracks\Challenges\Downloaded\'
+        remote_src: true
+      tags:
+        - after
+
     - name: copy revolt
       win_copy:
         src: '\\serveur\partage\retrogame\revolt'
-        dest: 'c:\users\admin\desktop\retro2\revolt'
+        dest: '%public%\desktop\retro\revolt'
         remote_src: true
       tags:
         - revolt
+
+    - name: install retrogame:zeus
+      win_unzip:
+        src: '\\serveur\partage\retrogame\Zeus.zip'
+        dest: '%programfiles%\'
+      tags:
+        - retro
+        - zeus
+    
+    - name: "create shortcut: zeus"
+      win_shortcut:
+        src: '%programfiles%\Zeus\zeus.exe'
+        dest: '%public%\desktop\retro\zeus.lnk'
+        icon: '%programfiles%\Zeus\zeus.exe,0'
+        state: absent
+      tags:
+        - retro
+        - zeus        
+        - shortcut
+
+    
+    - name: "create shortcut: pinball"
+      win_shortcut:
+        src: 'https://alula.github.io/SpaceCadetPinball/'
+        dest: '%public%\desktop\retro\pinball.lnk'       
+        state: present
+      tags:
+        - retro
+        - pinball        
+        - shortcut
+
+    - name: "create shortcut: pacman"
+      win_shortcut:
+        src: 'https://freepacman.org/'
+        dest: '%public%\desktop\retro\pacman.lnk'       
+        state: present
+      tags:
+        - retro
+        - pacman        
+        - shortcut
     ##copy openarena
     ##copy revolt
     ##make shortcut
