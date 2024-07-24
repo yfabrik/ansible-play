@@ -3,48 +3,26 @@
   hosts: charles
   gather_facts: false
   serial: 1
+  vars: 
+    apps:
+      - microsoft-windows-terminal
+      - libreoffice-fresh
+      - vcvrack
+      - vlc
+      - powertoys
+      - 7zip
+      - cura-new
+      - firefox
 
   tasks:
-    - name: install terminal
+    - name: install apps
       win_chocolatey:
-        name: microsoft-windows-terminal
+        name: '{{ item }}'
         state: present
-
-    - name: install libre office
-      win_chocolatey:
-        name: libreoffice-fresh
-        state: present
-        
-    - name: install vcvrack
-      win_chocolatey:
-        name: vcvrack
-        state: present
-
-    - name: install powertoys
-      win_chocolatey:
-        name: powertoys
-        state: present
-
-    - name: install 7zip
-      win_chocolatey:
-        name: 7zip
-        state: present
-
-    - name: install cura
-      win_chocolatey:
-        name: cura-new
-        state: present
-
-    - name: install firefox
-      win_chocolatey:
-        name: firefox
-        state: present
-
-    - name: install vlc
-      win_chocolatey:
-        name: vlc
-        state: present
-
+      loop: 
+        "{{ apps }}"
+      tags: 
+      - install
 
     - name: Create directory retrogame
       ansible.windows.win_file:
@@ -56,6 +34,8 @@
         - war3
         - tmnf
         - revolt
+        - zeus
+        
 
     # TODO c'est moche le openarene/openarena-0.8.8 ?
     - name: "install retrogame : open arena"
@@ -71,7 +51,8 @@
         src: '%programfiles%\openarena\openarena-0.8.8\openarena.exe'
         dest: '%public%\desktop\retro\arena.lnk'
         icon: '%programfiles%\openarena\openarena-0.8.8\openarena.exe,0'
-        state: absent
+        directory: '%programfiles%\openarena\openarena-0.8.8'
+        state: present
       tags:
         - retro
         - arena
@@ -97,7 +78,7 @@
         src: '%programfiles%\Warcraft III\warcraft III.exe'
         dest: '%public%\desktop\retro\war3.lnk'
         icon: '%programfiles%\Warcraft III\warcraft III.exe,0'
-        state: absent
+        state: present
       tags:
         - retro
         - war3
@@ -108,7 +89,7 @@
         src: '%programfiles%\Warcraft III\frozen throne.exe'
         dest: '%public%\desktop\retro\frozen throne.lnk'
         icon: '%programfiles%\Warcraft III\frozen throne.exe,0'
-        state: absent
+        state: present
       tags:
         - retro
         - war3        
@@ -163,7 +144,7 @@
 
     - name: install retrogame:zeus
       win_unzip:
-        src: '\\serveur\partage\retrogame\Zeus.zip'
+        src: '\\serveur\partage\retrogame\Sierra.zip'
         dest: '%programfiles%\'
       tags:
         - retro
@@ -171,14 +152,16 @@
     
     - name: "create shortcut: zeus"
       win_shortcut:
-        src: '%programfiles%\Zeus\zeus.exe'
+        src: '%programfiles%\Sierra\Le Maître de l'' Olympe  Zeus\zeus.exe'
         dest: '%public%\desktop\retro\zeus.lnk'
-        icon: '%programfiles%\Zeus\zeus.exe,0'
-        state: absent
+        icon: '%programfiles%\Sierra\Le Maître de l'' Olympe  Zeus\zeus.exe,0'
+        directory: '%programfiles%\Sierra\Le Maître de l'' Olympe  Zeus'
+        state: present
       tags:
         - retro
         - zeus        
         - shortcut
+        - tmp
 
     
     - name: "create shortcut: pinball"
